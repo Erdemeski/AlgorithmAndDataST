@@ -1,0 +1,139 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <ctime>
+#include <cstdlib>
+#include <chrono>
+
+using namespace std;
+using namespace std::chrono;
+
+struct Edge {
+    int p, q, w;
+};
+
+bool compareEdge(Edge a, Edge b) {
+    return a.w < b.w;
+}
+
+int findSet(int u, std::vector<int>& parent) {
+    if (u != parent[u])
+        parent[u] = findSet(parent[u], parent);
+    return parent[u];
+}
+
+std::vector<Edge> kruskal(std::vector<Edge>& edges, int n, int& totalWeight) {
+    std::sort(edges.begin(), edges.end(), compareEdge);
+    std::vector<int> parent(n);
+    std::vector<Edge> result;
+
+    for (int i = 0; i < n; i++)
+        parent[i] = i;
+
+    totalWeight = 0;
+    for (Edge e : edges) {
+        int setP = findSet(e.p, parent);
+        int setQ = findSet(e.q, parent);
+        if (setP != setQ) {
+            result.push_back(e);
+            totalWeight += e.w;
+            parent[setQ] = setP;
+        }
+        if (result.size() == n - 1)
+            break;
+    }
+    return result;
+}
+
+std::vector<Edge> readGraphFromFile(const std::string& filename) {
+    std::ifstream file(filename);
+    int n, m;
+    file >> n >> m;
+    std::vector<Edge> edges(m);
+    for (int i = 0; i < m; i++) {
+        file >> edges[i].p >> edges[i].q >> edges[i].w;
+    }
+    return edges;
+}
+
+std::vector<Edge> generateRandomGraph(int n, int m) {
+    std::vector<Edge> edges(m);
+    srand(time(0));
+    for (int i = 0; i < m; i++) {
+        edges[i].p = rand() % n;
+        edges[i].q = rand() % n;
+        edges[i].w = rand() % 100;
+    }
+    return edges;
+}
+
+void printGraph(const std::vector<Edge>& edges, int n, int m) {
+    std::cout << n << "\n" << m << "\n";
+    for (const Edge& e : edges) {
+        std::cout << e.p << " " << e.q << " " << e.w << "\n";
+    }
+}
+
+int main() {
+    std::vector<Edge> edges;
+    int n = 0;
+    while (true) {
+        cout << "\n\n********************************************\n";
+        std::cout << "Kruskal algorithm selection:\n";
+        std::cout << "1) Read graph from file\n";
+        std::cout << "2) Generate random graph\n";
+        std::cout << "3) Run and output of accepted edges (Minimum Spanning Tree Edges)\n";
+        std::cout << "4) Output all edges\n\n";
+        std::cout << "0) End\n";
+        cout << "********************************************\n";
+        std::cout << "Your selection: ";
+        int choice;
+        std::cin >> choice;
+        if (choice == 1) {
+            std::string filename;
+            std::cout << "Enter filename: ";
+            std::cin >> filename;
+            edges = readGraphFromFile(filename);
+            n = edges.size();
+        }
+        else if (choice == 2) {
+            std::cout << "Enter number of nodes and edges: ";
+            int m;
+            std::cin >> n >> m;
+            edges = generateRandomGraph(n, m);
+            cout << "\nNew graph has been generated\n";
+        }
+        else if (choice == 3) {
+            if (n == 0) {
+                std::cout << "Please read or generate a graph first.\n";
+                continue;
+            }
+            int totalWeight = 0;
+            auto start = high_resolution_clock::now();
+            std::vector<Edge> mst = kruskal(edges, n, totalWeight);
+            auto end = high_resolution_clock::now();
+            auto duration = duration_cast<nanoseconds>(end - start).count();
+            cout << "Time duration: " << duration << " nanoseconds" << endl;
+            std::cout << "Minimum Spanning Tree Edges:\n";
+            for (Edge e : mst) {
+                std::cout << e.p << " - " << e.q << " : " << e.w << "\n";
+            }
+            std::cout << "Weight of Minimum Spanning Tree is: " << totalWeight << "\n";
+        }
+        else if (choice == 4) {
+            std::cout << "All edges:\n";
+            for (Edge e : edges) {
+                std::cout << e.p << " - " << e.q << " : " << e.w << "\n";
+            }
+        }
+        else if (choice == 0) {
+            cout << "\n    Program has been CLOSED!\n\n" << endl;
+            break;
+        }
+        else {
+            cout << "\n    Enter a VALID choice!" << endl;
+        }
+    }
+    return 0;
+}
