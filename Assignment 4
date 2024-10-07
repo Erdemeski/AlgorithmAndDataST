@@ -1,0 +1,286 @@
+#include <iostream>
+using namespace std;
+
+class Node {
+public:
+    int key;
+    Node* parent;
+    Node* left;
+    Node* right;
+    Node(int k) {
+        key = k;
+        parent = nullptr;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+class BinarySTree {
+private:
+    Node* base;
+
+    void inorderPrint(Node* node) {
+        if (node != nullptr) {
+            inorderPrint(node->left);
+            cout << node->key << " ";
+            inorderPrint(node->right);
+        }
+    }
+
+    void printConnections(Node* node) {
+        if (node != nullptr) {
+            cout << "Node " << node->key << ": ";
+            if (node->parent != nullptr)
+                cout << "Parent(" << node->parent->key << ") ";
+            if (node->left != nullptr)
+                cout << "Left Child(" << node->left->key << ") ";
+            if (node->right != nullptr)
+                cout << "Right Child(" << node->right->key << ") ";
+            cout << endl;
+            printConnections(node->left);
+            printConnections(node->right);
+        }
+    }
+
+    Node* findMin(Node* node) {
+        while (node->left != nullptr)
+            node = node->left;
+        return node;
+    }
+
+    Node* findMax(Node* node) {
+        while (node->right != nullptr)
+            node = node->right;
+        return node;
+    }
+
+    Node* findSuccessor(Node* node) {
+        if (node->right != nullptr)
+            return findMin(node->right);
+        Node* parent = node->parent;
+        while (parent != nullptr && node == parent->right) {
+            node = parent;
+            parent = parent->parent;
+        }
+        return parent;
+    }
+
+    Node* findPredecessor(Node* node) {
+        if (node->left != nullptr)
+            return findMax(node->left);
+        Node* parent = node->parent;
+        while (parent != nullptr && node == parent->left) {
+            node = parent;
+            parent = parent->parent;
+        }
+        return parent;
+    }
+
+    void transfer(Node* x, Node* y) {
+        if (x->parent == nullptr)
+            base = y;
+        else if (x == x->parent->left)
+            x->parent->left = y;
+        else
+            x->parent->right = y;
+        if (y != nullptr)
+            y->parent = x->parent;
+    }
+
+public:
+    BinarySTree() {
+        base = nullptr;
+    }
+
+    void insert(int key) {
+        Node* new_node = new Node(key);
+        Node* y = nullptr;
+        Node* x = base;
+        while (x != nullptr) {
+            y = x;
+            if (new_node->key < x->key)
+                x = x->left;
+            else
+                x = x->right;
+        }
+        new_node->parent = y;
+        if (y == nullptr)
+            base = new_node;
+        else if (new_node->key < y->key)    
+            y->left = new_node;
+        else
+            y->right = new_node;
+        cout << "-------------------------\n";
+        cout << " " << key << " has been inserted" << endl;
+        cout << "-------------------------";
+    }
+
+    void orderedPrint() {
+        inorderPrint(base);
+        cout << endl;
+    }
+
+    void printConnections() {
+        printConnections(base);
+    }
+
+    Node* search(int key) {
+        Node* current = base;
+        while (current != nullptr && current->key != key) {
+            if (key < current->key)
+                current = current->left;
+            else
+                current = current->right;
+        }
+        return current;
+    }
+
+    void printMinMax() {
+        Node* minNode = findMin(base);
+        Node* maxNode = findMax(base);
+        cout << "\n-------------------\n";
+        cout << "Minimum: " << minNode->key << endl;
+        cout << "Maximum: " << maxNode->key << endl;
+        cout << "-------------------";
+    }
+
+    void printSuccessorPredecessor(int key) {
+        Node* node = search(key);
+        if (node != nullptr) {
+            Node* successor = findSuccessor(node);
+            Node* predecessor = findPredecessor(node);
+            cout << "\n------------------------\n";
+            cout << "Successor of " << key << ": ";
+            if (successor != nullptr)
+                cout << successor->key << endl;
+            else
+                cout << "DOES NOT exist" << endl;
+            cout << "Predecessor of " << key << ": ";
+            if (predecessor != nullptr)
+                cout << predecessor->key << endl;
+            else
+                cout << "DOES NOT exist" << endl;
+            cout << "------------------------";
+        }
+        else {
+            cout << "------------------------\n";
+            cout << "Key has NOT been FOUND" << endl;
+            cout << "------------------------\n";
+        }
+    }
+
+    void remove(int key) {
+        Node* node = search(key);
+        if (node != nullptr) {
+            if (node->left == nullptr)
+                transfer(node, node->right);
+            else if (node->right == nullptr)
+                transfer(node, node->left);
+            else {
+                Node* successor = findMin(node->right);
+                if (successor->parent != node) {
+                    transfer(successor, successor->right);
+                    successor->right = node->right;
+                    successor->right->parent = successor;
+                }
+                transfer(node, successor);
+                successor->left = node->left;
+                successor->left->parent = successor;
+            }
+            delete node;
+            cout << "-------------------------\n";
+            cout << key << " has been deleted" << endl;
+            cout << "-------------------------";
+        }
+        else {
+            cout << "------------------------\n";
+            cout << "Key has NOT been FOUND !!!" << endl;
+            cout << "------------------------\n";
+        }
+    }
+};
+
+int main() {
+    BinarySTree bST;
+    int choice;
+    do {
+        cout << "\n\n****************************************"
+            "\n Binary Search Tree - selection:"
+            "\n1) INSERT a value"
+            "\n2) ORDERED PRINT of keys"
+            "\n3) PRINT of connections"
+            "\n4) SEARCH a value"
+            "\n5) PRINT min / max values"
+            "\n6) PRINT successor and predecessor"
+            "\n7) REMOVE a node"
+            "\n\n0) CLOSE the program"
+            "\n****************************************"
+            "\n\nYour selection: ";
+        cin >> choice;
+        switch (choice) {
+        case 1: {
+            int value;
+            cout << "Enter value to insert: ";
+            cin >> value;
+            bST.insert(value);
+            break;
+        }
+        case 2: {
+            cout << "\n_ORDERED PRINT OF KEYS_\n";
+            cout << "-----------------------\n";
+            bST.orderedPrint();
+            cout << "-----------------------";
+            break;
+        }
+        case 3: {
+            cout << "\n_PRINT OF CONNECTIONS_\n";
+            cout << "----------------------\n";
+            bST.printConnections();
+            cout << "----------------------";
+            break;
+        }
+        case 4: {
+            int key;
+            cout << "Enter the key you want to search: ";
+            cin >> key;
+            Node* result = bST.search(key);
+            if (result != nullptr) {
+                cout << "----------------------------\n";
+                cout << "The element has been found" << endl;
+                cout << "----------------------------";
+            }
+            else {
+                cout << "----------------------------------\n";
+                cout << "The element has NOT been found!!!" << endl;
+                cout << "----------------------------------";
+            }
+            break;
+        }
+        case 5:
+            bST.printMinMax();
+            break;
+        case 6: {
+            int key;
+            cout << "Enter a key whose scs/prdc you want to find: ";
+            cin >> key;
+            bST.printSuccessorPredecessor(key);
+            break;
+        }
+        case 7: {
+            int key;
+            cout << "Enter the key you want to remove: ";
+            cin >> key;
+            bST.remove(key);
+            break;
+        }
+        case 0:
+            cout << "\n    Program has been CLOSED!\n\n" << endl;
+            break;
+        default:
+            cout << "\n    Enter a VALID choice!" << endl;
+            break;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
