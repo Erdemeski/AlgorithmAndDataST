@@ -1,0 +1,244 @@
+#include <iostream>
+#include <list>
+#include <queue>
+#include <stack>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
+class Graph {
+    int V;
+    list<int>* adj;
+
+public:
+    Graph(int V);
+    void addEdge(int v, int w);
+    void DFS(int s, int d);
+    void BFS(int s, int d);
+};
+
+Graph::Graph(int V) {
+    this->V = V;
+    adj = new list<int>[V];
+}
+
+void Graph::addEdge(int v, int w) {
+    adj[v].push_back(w);
+    adj[w].push_back(v);
+}
+
+void Graph::DFS(int s, int d) {
+    auto start = high_resolution_clock::now();
+
+    vector<bool> visited(V, false);
+    stack<int> stack;
+    vector<int> path;
+    vector<int> final_path;
+
+    stack.push(s);
+
+    while (!stack.empty()) {
+        int v = stack.top();
+
+        if (!visited[v]) {
+            visited[v] = true;
+            path.push_back(v);
+
+            if (v == d) {
+                final_path = path;
+                break;
+            }
+        }
+
+        bool found_unvisited = false;
+        for (auto i = adj[v].begin(); i != adj[v].end(); ++i) {
+            if (!visited[*i]) {
+                stack.push(*i);
+                found_unvisited = true;
+                break;
+            }
+        }
+
+        if (!found_unvisited) {
+            stack.pop();
+            path.pop_back();
+        }
+    }
+
+    if (!final_path.empty() && final_path.back() == d) {
+        cout << ",,,,,,,,,,,,,,,,,,,,,,,,,,\n";
+        for (int node : final_path) {
+            cout << node + 1 << " ";
+        }
+        cout << "\n''''''''''''''''''''''''''\n";
+        cout << "Path length: " << final_path.size() - 1 << endl;
+    }
+    else {
+        cout << ",,,,,,,,,,,,,,,,,,,,,,,,,,\n";
+        cout << "No path found from " << s + 1 << " to " << d + 1 << endl;
+        cout << "''''''''''''''''''''''''''\n";
+        cout << "Path length: 0" << endl;
+    }
+
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<nanoseconds>(end - start).count();
+    cout << "Search duration: " << duration << " nanoseconds" << endl;
+}
+
+void Graph::BFS(int s, int d) {
+    auto start = high_resolution_clock::now();
+
+    vector<bool> visited(V, false);
+    queue<int> queue;
+    vector<int> parent(V, -1);
+
+    visited[s] = true;
+    queue.push(s);
+
+    while (!queue.empty()) {
+        int v = queue.front();
+        queue.pop();
+
+        if (v == d) {
+            cout << ",,,,,,,,,,,,,,,,,,,,,,,,,,\n";
+            stack<int> path;
+            while (v != -1) {
+                path.push(v);
+                v = parent[v];
+            }
+
+            vector<int> final_path;
+            while (!path.empty()) {
+                final_path.push_back(path.top());
+                cout << path.top() + 1 << " ";
+                path.pop();
+            }
+            cout << "\n''''''''''''''''''''''''''\n";
+            cout << "Path length: " << final_path.size() - 1 << endl;
+
+            auto end = high_resolution_clock::now();
+            auto duration = duration_cast<nanoseconds>(end - start).count();
+            cout << "Search duration: " << duration << " nanoseconds" << endl;
+
+            return;
+        }
+
+        for (auto i : adj[v]) {
+            if (!visited[i]) {
+                visited[i] = true;
+                parent[i] = v;
+                queue.push(i);
+            }
+        }
+    }
+    cout << ",,,,,,,,,,,,,,,,,,,,,,,,,,\n";
+    cout << "No path found from " << s + 1 << " to " << d + 1 << endl;
+    cout << "''''''''''''''''''''''''''\n";
+    cout << "Path length: 0" << endl;
+
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<nanoseconds>(end - start).count();
+    cout << "Search duration: " << duration << " nanoseconds" << endl;
+}
+
+Graph* readGraphFromFile(const string& filename) {
+    ifstream file(filename);
+    if (!file) {
+        cerr << "Unable to open file " << filename << endl;
+        exit(1);
+    }
+
+    int V, E;
+    file >> V >> E;
+    Graph* graph = new Graph(V);
+
+    int v, w, weight;
+    while (file >> v >> w >> weight) {
+        graph->addEdge(v - 1, w - 1);
+    }
+
+    file.close();
+    return graph;
+}
+
+int main() {
+    Graph* graph = nullptr;
+    int choice;
+    int s, d;
+
+    while (true) {
+        cout << "\n\n********************************************"
+            "\n Depth-first search and breadth-first search:"
+            "\n1) Read a graf.txt"
+            "\n2) Read a grafBig.txt"
+            "\n3) Breadth-first search from s to d"
+            "\n4) Depth-first search from s to d"
+            "\n\n0) CLOSE the program"
+            "\n********************************************"
+            "\n\nYour selection: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            if (graph != nullptr)
+                delete graph;
+            graph = readGraphFromFile("graf.txt");
+            cout << "---------------------------\n";
+            cout << "Graph loaded from graf.txt" << endl;
+            cout << "---------------------------";
+            break;
+        case 2:
+            if (graph != nullptr)
+                delete graph;
+            graph = readGraphFromFile("grafBig.txt");
+            cout << "------------------------------\n";
+            cout << "Graph loaded from grafBig.txt" << endl;
+            cout << "------------------------------";
+            break;
+        case 3:
+            if (graph == nullptr) {
+                cout << "-------------------------------------------\n";
+                cout << "Please load a graph first (option 1 or 2)!" << endl;
+                cout << "-------------------------------------------";
+                break;
+            }
+            cout << "Enter source (s): ";
+            cin >> s;
+            cout << "Enter destination (d): ";
+            cin >> d;
+            cout << "-------------------------------------------\n";
+            cout << "Breadth-first transition from " << s << " to " << d << ":" << endl;
+            graph->BFS(s - 1, d - 1);
+            cout << "-------------------------------------------\n";
+            break;
+        case 4:
+            if (graph == nullptr) {
+                cout << "-------------------------------------------\n";
+                cout << "Please load a graph first (option 1 or 2)!" << endl;
+                cout << "-------------------------------------------";
+                break;
+            }
+            cout << "Enter source (s): ";
+            cin >> s;
+            cout << "Enter destination (d): ";
+            cin >> d;
+            cout << "-------------------------------------------\n";
+            cout << "Depth-first transition from " << s << " to " << d << ":" << endl;
+            graph->DFS(s - 1, d - 1);
+            cout << "-------------------------------------------\n";
+            break;
+        case 0:
+            if (graph != nullptr)
+                delete graph;
+            cout << "\n    Program has been CLOSED!\n\n" << endl;
+            return 0;
+        default:
+            cout << "\n    Enter a VALID choice!" << endl;
+            break;
+        }
+    }
+}
