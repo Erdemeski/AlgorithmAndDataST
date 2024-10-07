@@ -1,0 +1,181 @@
+#include <iostream>
+#include <cstdlib>
+#include <chrono>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node* prev;
+};
+
+
+
+Node* partition(Node* l, Node* h) {
+    Node* pivot = l;
+    Node* left = l;
+    Node* right = h;
+    bool flag = false;
+    while (!flag) {
+        while (left != nullptr && left->data <= pivot->data) {
+            if (left == right) flag = true;
+            left = left->next;
+        }
+        while (right != nullptr && right->data > pivot->data) {
+            if (right == left) flag = true;
+            right = right->prev;
+        }
+        if (!flag) {
+            swap(left->data, right->data);
+        }
+    }
+    swap(pivot->data, right->data);
+    return right;
+}
+
+void swap(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+void quicksort(Node* l, Node* h) {
+    if (h != nullptr && l != h && l != h->next) {
+        Node* p = partition(l, h);
+        quicksort(l, p->prev);
+        quicksort(p->next, h);
+    }
+}
+
+void printList(Node* node) {
+    while (node != nullptr) {
+        cout << node->data << " ";
+        node = node->next;
+    }
+    cout << endl;
+}
+
+void generateRandomSequence(Node*& head, Node*& tail, int N) {
+    srand(time(nullptr));
+    for (int i = 0; i < N; ++i) {
+        Node* newNode = new Node;
+        newNode->data = rand() % 1000000;
+        newNode->next = nullptr;
+        newNode->prev = tail;
+        if (tail != nullptr)
+            tail->next = newNode;
+        else
+            head = newNode;
+        tail = newNode;
+    }
+}
+
+void generateIncreasingSequence(Node*& head, Node*& tail, int N) {
+    for (int i = 0; i < N; ++i) {
+        Node* newNode = new Node;
+        newNode->data = i + 1;
+        newNode->next = nullptr;
+        newNode->prev = tail;
+        if (tail != nullptr)
+            tail->next = newNode;
+        else
+            head = newNode;
+        tail = newNode;
+    }
+}
+
+bool isIncreasingSequence(Node* head) {
+    while (head != nullptr && head->next != nullptr) {
+        if (head->data > head->next->data)
+            return false;
+        head = head->next;
+    }
+    return true;
+}
+
+void deleteList(Node*& head) {
+    while (head != nullptr) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+int main() {
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    int choice, size;
+    do {
+        cout << "\n\n****************************************"
+            "\n QuickSort on doubly linked list - operation:"
+            "\n1) Generate random sequence"
+            "\n2) Generate increasing sequence"
+            "\n3) Print current sequence"
+            "\n4) Check if list is increasing (sorted)"
+            "\n5) Sort with Quicksort"
+            "\n\n0) CLOSE the program"
+            "\n****************************************"
+            "\n\nYour selection: ";
+        cin >> choice;
+        switch (choice) {
+        case 1:
+            cout << "Enter a size for sequence: ";
+            cin >> size;
+            generateRandomSequence(head, tail, size);
+            cout << "\n___PRINT OF NEW SEQUENCE___\n";
+            cout << "---------------------------\n";
+            //printList(head);
+            cout << "---------------------------";
+            break;
+        case 2:
+            cout << "Enter a size for sequence: ";
+            cin >> size;
+            generateIncreasingSequence(head, tail, size);
+            cout << "\n___PRINT OF NEW SEQUENCE___\n";
+            cout << "---------------------------\n";
+            printList(head);
+            cout << "---------------------------";
+            break;
+        case 3:
+            cout << "\n___PRINT OF SEQUENCE___\n";
+            cout << "-----------------------\n";
+            printList(head);
+            cout << "-----------------------";
+            break;
+        case 4:
+            if (isIncreasingSequence(head)) {
+                cout << "------------------\n";
+                cout << "Array is SORTED" << endl;
+                cout << "------------------";}
+            else {
+                cout << "----------------------\n";
+                cout << "Array is NOT sorted!" << endl;
+                cout << "----------------------";}
+            break;
+        case 5: {
+
+            auto start = chrono::high_resolution_clock::now();
+            quicksort(head, tail);
+            auto end = chrono::high_resolution_clock::now();
+
+            cout << "-------------------------------------\n";
+            cout << "Sequence has been SORTED with quicksort" << endl;
+            auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
+            cout << "Quicksort took " << duration.count() << " nanoseconds." << endl;
+            cout << "Sorted sequence: ";
+            //printList(head);
+            cout << endl << "-------------------------------------";
+            break;
+        }
+        case 0:
+            cout << "\n    Program has been CLOSED!\n\n" << endl;
+            break;
+        default:
+            cout << "\n    Enter a VALID choice!" << endl;
+        }
+    } while (choice != 0);
+
+    deleteList(head);
+
+    return 0;
+}
