@@ -1,0 +1,122 @@
+#include <iostream>
+#include <stack>
+#include <vector>  //I used vector for only printing because there is a logical error if I want print the stacks normaly or by using array.
+using namespace std;
+
+void printStack(stack<int> currentSize) {
+    vector<int> temp;
+    while (!currentSize.empty()) {
+        temp.push_back(currentSize.top());
+        currentSize.pop();
+    }
+    for (int i = temp.size() - 1; i >= 0; --i) {
+        cout << temp[i] << " ";
+    }
+    cout << endl;
+}
+
+bool canMove(stack<int>& from, stack<int>& to) {
+    if (from.empty()) {
+        cout << "The stack is EMPTY !!!" << endl;
+        return false;
+    }
+    else if (!to.empty() && from.top() > to.top()) {
+        cout << "INVALID MOVE !!! Disc cannot be placed on a smaller disc." << endl;
+        return false;
+    }
+    return true;
+}
+
+void moveDisk(stack<int>& from, stack<int>& to) {
+    int disk = from.top();
+    from.pop();
+    to.push(disk);
+}
+
+int main() {
+    stack<int> stack1, stack2, stack3;
+    int size;
+    cout << "Please enter a SIZE for the tower:  ";
+    cin >> size;
+
+    while (size < 1) {
+        cout << "\nThe size should be valid integer and more than zero!";
+        cout << "\nPlease enter size of the tower, again:  ";
+        cin >> size;
+    }
+
+    for (int i = size; i >= 1; --i)
+        stack1.push(i);
+
+    int selection;
+    do {
+        cout << "\n------------------\nCurrent State:" << endl;
+        cout << "Stack 1: ";
+        printStack(stack1);
+        cout << "Stack 2: ";
+        printStack(stack2);
+        cout << "Stack 3: ";
+        printStack(stack3);
+        cout << "------------------";
+
+        cout << "\n****************************************"
+            "\n Command selection:"
+            "\n1) MOVING --> from 1st stack to 2nd stack"
+            "\n2) MOVING --> from 1st stack to 3rd stack"
+            "\n3) MOVING --> from 2nd stack to 1st stack"
+            "\n4) MOVING --> from 2nd stack to 3rd stack"
+            "\n5) MOVING --> from 3rd stack to 1st stack"
+            "\n6) MOVING --> from 3rd stack to 2nd stack"
+            "\n7) Close the program"
+            "\n****************************************"
+            "\n\nYour selection: ";
+        cin >> selection;
+
+        switch (selection) {
+        case 1:
+            if (canMove(stack1, stack2))
+                moveDisk(stack1, stack2);
+            break;
+        case 2:
+            if (canMove(stack1, stack3))
+                moveDisk(stack1, stack3);
+            break;
+        case 3:
+            if (canMove(stack2, stack1))
+                moveDisk(stack2, stack1);
+            break;
+        case 4:
+            if (canMove(stack2, stack3))
+                moveDisk(stack2, stack3);
+            break;
+        case 5:
+            if (canMove(stack3, stack1))
+                moveDisk(stack3, stack1);
+            break;
+        case 6:
+            if (canMove(stack3, stack2))
+                moveDisk(stack3, stack2);
+            break;
+        case 7:
+            cout << "\n     Program has been CLOSED!\n\n";
+            break;
+        default:
+            cout << "\n     Enter a valid number!\n";
+            break;
+        }
+
+        if (stack3.size() == size) {
+            cout << "\n------------------\nCurrent State:" << endl;
+            cout << "Stack 1: ";
+            printStack(stack1);
+            cout << "Stack 2: ";
+            printStack(stack2);
+            cout << "Stack 3: ";
+            printStack(stack3);
+            cout << "------------------";
+            cout << "\n     CONGRATULATIONS!!! YOU WON...\n\n";
+            break;
+        }
+    } while (selection != 7);
+    return 0;
+}
