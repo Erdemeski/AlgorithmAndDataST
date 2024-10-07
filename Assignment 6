@@ -1,0 +1,247 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
+int PARTITION(vector<int>& a, int firstIndex, int lastIndex) {
+    int pe = a[firstIndex];
+    int l = firstIndex;
+    int r = lastIndex;
+    while (l < r) {
+        while (a[l] <= pe && l < lastIndex)
+            l++;
+        while (a[r] >= pe && r > firstIndex)
+            r--;
+        if (l < r)
+            swap(a[l], a[r]);
+    }
+    swap(a[firstIndex], a[r]);
+    return r;
+}
+
+void QUICK_SORT(vector<int>& array, int firstIndex, int lastIndex) {
+    if (firstIndex < lastIndex) {
+        int j = PARTITION(array, firstIndex, lastIndex);
+        QUICK_SORT(array, firstIndex, j - 1);
+        QUICK_SORT(array, j + 1, lastIndex);
+    }
+}
+
+void printSequence(const vector<int>& sequence) {
+    cout << "Current sequence: ";
+    for (int num : sequence)
+        cout << num << " ";
+    cout << endl;
+}
+
+bool isSorted(const vector<int>& sequence) {
+    return is_sorted(sequence.begin(), sequence.end());
+}
+
+int sumSequence(const vector<int>& sequence) {
+    int sum = 0;
+    for (int num : sequence)
+        sum += num;
+    return sum;
+}
+
+void generateRandomSequence(vector<int>& sequence, int size) {
+    sequence.clear();
+    for (int i = 0; i < size; ++i)
+        sequence.push_back(rand() % 100);
+}
+
+void generateIncreasingSequence(vector<int>& sequence, int size) {
+    sequence.clear();
+    for (int i = 0; i < size; ++i)
+        sequence.push_back(i);
+}
+
+void generateDecreasingSequence(vector<int>& sequence, int size) {
+    sequence.clear();
+    for (int i = size - 1; i >= 0; --i)
+        sequence.push_back(i);
+}
+
+void sortWithRandomizedQuicksort(vector<int>& sequence, int firstIndex, int lastIndex) {
+    srand(time(nullptr));
+    random_shuffle(sequence.begin(), sequence.end());
+    QUICK_SORT(sequence, firstIndex, lastIndex);
+}
+
+int medianOfThree(vector<int>& array, int left, int right) {
+    int mid = left + (right - left) / 2;
+
+    if (array[left] > array[mid])
+        swap(array[left], array[mid]);
+    if (array[left] > array[right])
+        swap(array[left], array[right]);
+    if (array[mid] > array[right])
+        swap(array[mid], array[right]);
+
+    return mid;
+}
+
+void sortWithMedianQuicksort(vector<int>& array, int left, int right) {
+    if (left < right) {
+        int pivotIndex = medianOfThree(array, left, right);
+        int pivot = array[pivotIndex];
+
+        int i = left - 1;
+        int j = right + 1;
+        while (true) {
+            do {
+                i++;
+            } while (array[i] < pivot);
+
+            do {
+                j--;
+            } while (array[j] > pivot);
+
+            if (i >= j)
+                break;
+
+            swap(array[i], array[j]);
+        }
+        sortWithMedianQuicksort(array, left, j);
+        sortWithMedianQuicksort(array, j + 1, right);
+    }
+}
+
+void bubbleSort(vector<int>& array) {
+    int n = array.size();
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = 0; j < n - i - 1; ++j) {
+            if (array[j] > array[j + 1])
+                swap(array[j], array[j + 1]);
+        }
+    }
+}
+
+int main() {
+    vector<int> sequence;
+    int choice;
+    int size_of_sequence;
+    srand(time(nullptr));
+
+    while (true) {
+        cout << "\n\n****************************************"
+            "\n Quicksort - operation:"
+            "\n1) Generate random sequence"
+            "\n2) Generate increasing sequence"
+            "\n3) Generate decreasing sequence"
+            "\n4) Print the current sequence"
+            "\n5) Check if array is sorted"
+            "\n6) Print sum of sequence"
+            "\n7) Sort with Quicksort"
+            "\n8) Sort with randomized Quicksort"
+            "\n9) Sort with median Quicksort"
+            "\n10) Sort with Bubblesort"
+            "\n\n0) CLOSE the program"
+            "\n****************************************"
+            "\n\nYour selection: ";
+        cin >> choice;
+
+
+        switch (choice) {
+        case 1:
+            cin >> size_of_sequence;
+            generateRandomSequence(sequence, size_of_sequence);
+            cout << "\n___PRINT OF NEW SEQUENCE___\n";
+            cout << "---------------------------\n";
+            printSequence(sequence);
+            cout << "---------------------------";
+            break;
+        case 2:
+            cin >> size_of_sequence;
+            generateIncreasingSequence(sequence, size_of_sequence);
+            cout << "\n___PRINT OF NEW SEQUENCE___\n";
+            cout << "---------------------------\n";
+            printSequence(sequence);
+            cout << "---------------------------";
+            break;
+        case 3:
+            cin >> size_of_sequence;
+            generateDecreasingSequence(sequence, size_of_sequence);
+            cout << "\n___PRINT OF NEW SEQUENCE___\n";
+            cout << "---------------------------\n";
+            printSequence(sequence);
+            cout << "---------------------------";
+            break;
+        case 4:
+            cout << "\n___PRINT OF SEQUENCE___\n";
+            cout << "-----------------------\n";
+            printSequence(sequence);
+            cout << "-----------------------";
+            break;
+        case 5:
+            if (isSorted(sequence)) {
+                cout << "------------------\n";
+                cout << "Array is SORTED" << endl;
+                cout << "------------------";
+            }
+            else {
+                cout << "----------------------\n";
+                cout << "Array is NOT sorted!" << endl;
+                cout << "----------------------";
+            }
+            break;
+        case 6:
+            cout << "\n____SUM OF SEQUENCE____\n";
+            cout << "-----------------------\n";
+            cout << sumSequence(sequence) << endl;
+            cout << "-----------------------";
+            break;
+        case 7: {
+            auto start = steady_clock::now();
+            QUICK_SORT(sequence, 0, sequence.size() - 1);
+            auto end = steady_clock::now();
+            cout << "-------------------------------------\n";
+            cout << "Array has been SORTED with quicksort" << endl;
+            cout << "Duration: " << duration_cast<nanoseconds>(end - start).count() << " nanosecond" << endl;
+            cout << "-------------------------------------";
+            break;
+        }
+        case 8: {
+            auto start = steady_clock::now();
+            sortWithRandomizedQuicksort(sequence, 0, sequence.size() - 1);
+            auto end = steady_clock::now();
+            cout << "--------------------------------------------\n";
+            cout << "Array has been SORTED with random quicksort" << endl;
+            cout << "Duration: " << duration_cast<nanoseconds>(end - start).count() << " nanosecond" << endl;
+            cout << "--------------------------------------------";
+            break;
+        }
+        case 9: {
+            auto start = steady_clock::now();
+            sortWithMedianQuicksort(sequence, 0, sequence.size() - 1);
+            auto end = steady_clock::now();
+            cout << "--------------------------------------------\n";
+            cout << "Array has been SORTED with median quicksort" << endl;
+            cout << "Duration: " << duration_cast<nanoseconds>(end - start).count() << " nanosecond" << endl;
+            cout << "--------------------------------------------";
+            break;
+        }
+        case 10: {
+            auto start = steady_clock::now();
+            bubbleSort(sequence);
+            auto end = steady_clock::now();
+            cout << "--------------------------------------------\n";
+            cout << "Array has been SORTED with Bubblesort" << endl;
+            cout << "Duration: " << duration_cast<nanoseconds>(end - start).count() << " nanosecond" << endl;
+            cout << "--------------------------------------------";
+            break;
+        }
+        case 0:
+            cout << "\n    Program has been CLOSED!\n\n" << endl;
+            return 0;
+        default:
+            cout << "\n    Enter a VALID choice!" << endl;
+        }
+    }
+    return 0;
+}
