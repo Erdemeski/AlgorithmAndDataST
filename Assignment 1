@@ -1,0 +1,160 @@
+#include <iostream> 
+using namespace std;
+
+class Array {
+public:
+    int* array;
+    int sizeArray;
+    int top;
+    int head;
+    int tail;
+
+    int pop() {
+        return array[top--];
+    }
+
+    void push(int x) {
+        if (top < sizeArray - 1) {
+            top++;
+            array[top] = x;
+            cout <<" New number is --> " << array[top];
+        }
+        else {
+            cout << " The stack is FULL!";
+        }
+    }
+
+    int dequeue() {
+        int z = array[head++];
+        if (head >= sizeArray)
+            head = (head + 1) % sizeArray;
+        return z;
+    }
+
+    void enqueue(int y) {
+        int newTail = (tail + 1) % sizeArray;;
+        if (newTail > sizeArray)
+            newTail = 0;
+        else if (newTail == head)
+            cout << " The queue is FULL!";
+        else {
+            array[tail] = y;
+            cout << " New number is --> " << y;
+            tail = newTail;
+        }
+    }
+};
+
+int main() {
+
+    cout << "Please enter size of the STACK= ";
+    int sizeStack;
+    cin >> sizeStack;
+
+    while (sizeStack < 1 ) {
+        cout << "\nThe size should be valid integer and more than zero!";
+        cout << "\nPlease enter size of the STACK, again= ";
+        cin >> sizeStack;
+    }   
+
+    cout << "\nPlease enter size of the QUEUE= ";
+    int sizeQueue;
+    cin >> sizeQueue;
+
+    while (sizeQueue < 1 ) {
+        cout << "\nThe size should be valid integer and more than zero!";
+        cout << "\nPlease enter size of the QUEUE, again= ";
+        cin >> sizeQueue;
+    }
+
+    Array stack;
+    stack.sizeArray = sizeStack;
+    stack.array = new int[stack.sizeArray];
+    stack.top = -1;
+
+    Array queue;
+    queue.sizeArray = sizeQueue + 1;
+    queue.array = new int[queue.sizeArray];
+    queue.head = 0;
+    queue.tail = 0;
+
+    int request = 0;
+    do {
+        cout << "\n****************************************"
+            "\n Stack - selection:"
+            "\n1) Insert a number"
+            "\n2) Read a number"
+            "\n3) Print the stack"
+            "\n\n Queue - selection:"
+            "\n4) Insert a number"
+            "\n5) Read a number"
+            "\n6) Print the queue from head to tail"
+            "\n\n7) Close the program"
+            "\n****************************************"
+            "\n\nYour selection: ";
+
+        cin >> request;
+        int newStackNumber = 0;
+        int newQueueNumber = 0;
+
+        if (request == 1) {
+            cout << "\nEnter a new number: ";
+            cin >> newStackNumber;
+            cout << endl << "------------------\n";
+            stack.push(newStackNumber);
+            cout << endl << "------------------";
+        }
+        else if (request == 2) {
+            if (stack.top > -1) {
+                cout << "------------------";
+                cout << "\n The last number was --> " << stack.pop() << endl;
+                cout << "------------------";
+            }
+            else
+                cout << "\n There is NOT any index in the stack!";
+        }
+        else if (request == 3) {
+            int readS = stack.top;
+            cout << endl << "------------------" << endl;
+            for (int i = 0; i <= readS; i++)
+                cout << "[" << stack.array[i] << "] ";
+            cout << endl << "------------------";
+        }
+        else if (request == 4) {
+            cout << "\nEnter a new number: ";
+            cin >> newQueueNumber;
+            cout << endl << "------------------\n";
+            queue.enqueue(newQueueNumber);
+            cout << endl << "------------------";
+        }
+        else if (request == 5) {
+            if (queue.head == queue.tail) {
+                cout << "------------------";
+                cout << "\n The queue is EMPITY!" << endl;
+                cout << "------------------";
+            }
+            else {
+                cout << "------------------";
+                cout << "\n The last number was --> " << queue.dequeue() << endl;
+                cout << "------------------";
+            }
+        }
+        else if (request == 6) {
+            cout << endl << "------------------" << endl;
+            int i = queue.head;
+            while (i != queue.tail) {
+                cout << "[" << queue.array[i] << "] ";
+                i = (i + 1) % queue.sizeArray;
+            }
+            cout << endl << "------------------";
+        }
+        else if (request == 7) {
+            cout << "\n     Program has been CLOSED!\n\n";
+            request = -1;
+            break;
+        }
+        else
+            cout << "\n     Enter a valid number!\n";
+    } while (request != -1);
+    return 0;
+}
