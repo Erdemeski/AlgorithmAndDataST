@@ -1,0 +1,185 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+#include <list>
+#include <limits>
+
+using namespace std;
+
+void printAllMovies(const map<int, list<string>>& movieMap) {
+    cout << "=====================================================\n";
+    for (const auto& pair : movieMap) {
+        cout << "Date: " << pair.first << endl;
+        for (const auto& movie : pair.second) {
+            cout << "  Movie: " << movie << endl;
+        }
+    }
+    cout << "=====================================================\n";
+}
+
+void insertMovie(map<int, list<string>>& movieMap, int date, const string& name) {
+    movieMap[date].push_back(name);
+    cout << "-------------------------\n";
+    cout << " " << date << " : " << name << " has been inserted" << endl;
+    cout << "-------------------------";
+
+}
+
+void printMoviesAtDate(const map<int, list<string>>& movieMap, int date) {
+    auto iterator = movieMap.find(date);
+    if (iterator != movieMap.end()) {
+        cout << "-----------------------\n";
+        cout << "Movies on date " << date << ":\n";
+        for (const auto& movie : iterator->second) {
+            cout << "  " << movie << endl;
+        }
+        cout << "-----------------------";
+    }
+    else {
+        cout << "----------------------------------------------\n";
+        cout << "ANY movie has NOT been FOUND on this date !!!" << endl;
+        cout << "----------------------------------------------\n";
+    }
+}
+
+void findMinMaxDate(const map<int, list<string>>& movieMap) {
+    if (!movieMap.empty()) {
+        cout << "\n-------------------\n";
+        cout << "Minimum date: " << movieMap.begin()->first << endl;
+        cout << "Maximum date: " << movieMap.rbegin()->first << endl;
+        cout << "-------------------";
+    }
+    else {
+        cout << "---------------------\n";
+        cout << "The list is EMPTY!!!" << endl;
+        cout << "---------------------\n";
+    }
+}
+
+void deleteMoviesAtDate(map<int, list<string>>& movieMap, int date) {
+    movieMap.erase(date);
+    cout << "-----------------------------------------------------------\n";
+    cout << "The movie(s) of " << date << " has/have been deleted" << endl;
+    cout << "-----------------------------------------------------------";
+
+}
+
+void loadMoviesFromFilee(map<int, list<string>>& movieMap, const string& filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "------------------------\n";
+        cerr << "CANNOT open file !!!: " << filename << endl;
+        cout << "------------------------\n";
+        return;
+    }
+    int date;
+    string name;
+    while (file >> date && getline(file, name)) {
+        if (!name.empty() && name[0] == ' ') {
+            name = name.substr(1);
+        }
+        insertMovie(movieMap, date, name);
+    }
+    file.close();
+    cout << "-------------------------------------\n";
+    cout << "Movies loaded from file successfully" << endl;
+    cout << "-------------------------------------\n";
+}
+
+void printSuccessorAndPredecessor(const map<int, list<string>>& movieMap, int date) {
+    auto it = movieMap.find(date);
+    if (it != movieMap.end()) {
+        auto successor = next(it);
+        auto predecessor = (it == movieMap.begin()) ? movieMap.end() : prev(it);
+        cout << "\n------------------------\n";
+        if (successor != movieMap.end()) {
+            cout << "Successor of date " << date << " is: " << successor->first << endl;
+        }
+        else {
+            cout << "No successor found for date " << date << endl;
+        }
+        if (predecessor != movieMap.end()) {
+            cout << "Predecessor of date " << date << " is: " << predecessor->first << endl;
+        }
+        else {
+            cout << "No predecessor found for date " << date << endl;
+        }
+        cout << "------------------------\n";
+    }
+    else {
+        cout << "---------------------------\n";
+        cout << "Date has NOT been FOUND !!!" << endl;
+        cout << "---------------------------\n";
+    }
+}
+
+int main() {
+    map<int, list<string>> movieMap;
+    int choice;
+    int date;
+    string name;
+    string filename = "C:/Users/erdem/Desktop/Programlar/Visual Studio/Microsoft Visual Studio Dosyalarım/Erasmus/Algorithm and Data Structures/Assignment 5/";
+    string temp;
+    do {
+        cout << "\n\n****************************************"
+            "\n IMDB movie list map - selection:"
+            "\n1) INSERT a movie"
+            "\n2) PRINT all movies"
+            "\n3) FIND movies at a specific date"
+            "\n4) PRINT minimum and maximum date"
+            "\n5) PRINT successor and predecessor"
+            "\n6) REMOVE all movies at specific date"
+            "\n7) LOAD movies from the file"
+            "\n\n0) CLOSE the program"
+            "\n****************************************"
+            "\n\nYour selection: ";
+        cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        switch (choice) {
+        case 1:
+            cout << "Enter DATE to insert movie (YYYYMMDD): ";
+            cin >> date;
+            cin.ignore();
+            cout << "Enter MOVIE NAME to insert: ";
+            getline(cin, name);
+            insertMovie(movieMap, date, name);
+            break;
+        case 2:
+            printAllMovies(movieMap);
+            break;
+        case 3:
+            cout << "Enter DATE to find movies on (YYYYMMDD): ";
+            cin >> date;
+            printMoviesAtDate(movieMap, date);
+            break;
+        case 4:
+            findMinMaxDate(movieMap);
+            break;
+        case 5:
+            cout << "Enter DATE to print successor and predecessor (YYYYMMDD): ";
+            cin >> date;
+            printSuccessorAndPredecessor(movieMap, date);
+            break;
+
+        case 6:
+            cout << "Enter DATE to remove all movies (YYYYMMDD): ";
+            cin >> date;
+            deleteMoviesAtDate(movieMap, date);
+            break;
+        case 7:
+            cout << "Enter FILENAME to load movies from: ";
+            getline(cin, temp);
+            loadMoviesFromFilee(movieMap, filename+temp);
+            break;
+        case 0:
+            cout << "\n    Program has been CLOSED!\n\n" << endl;
+            break;
+        default:
+            cout << "\n    Enter a VALID choice!" << endl;
+            break;
+        }
+    } while (choice != 0);
+    return 0;
+}
