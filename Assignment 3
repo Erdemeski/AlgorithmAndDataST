@@ -1,0 +1,245 @@
+#include <iostream>
+
+using namespace std;
+
+class Point {
+public:
+    int data;
+    Point* next;
+    Point* prev;
+    Point(int value) {
+        data = value;
+        next = nullptr;
+        prev = nullptr;
+    }
+};
+
+class DLinkedList {
+private:
+    Point* head;
+    Point* tail;
+
+public:
+    DLinkedList() {
+        head = nullptr;
+        tail = nullptr;
+    }
+
+    bool search(int key) {
+        Point* current = head;
+        int indexNumber = 1;
+        while (current != nullptr) {
+            if (current->data == key)
+                return true;
+            current = current->next;
+            indexNumber++;
+        }
+        return false;
+    }
+
+    void insertIntoHead(int value) {
+        Point* newNode = new Point(value);
+        if (head == nullptr) {
+            head = newNode;
+            tail = newNode;
+        }
+        else {
+            newNode->next = head;
+            head->prev = newNode;
+            head = newNode;
+        }
+        cout << "-------------------------\n";
+        cout << " " << value << " has been inserted" << endl;
+        cout << "-------------------------";
+    }
+
+    void insertAfterElement(int value, int key) {
+        Point* newNode = new Point(value);
+        Point* current = head;
+        while (current != nullptr) {
+            if (current->data == key) {
+                newNode->prev = current;
+                newNode->next = current->next;
+                if (current->next != nullptr)
+                    current->next->prev = newNode;
+                else
+                    tail = newNode;
+                current->next = newNode;
+                cout << "-----------------------------\n";
+                cout << " " << value << " has been inserted after " << key << endl;
+                cout << "-----------------------------";
+
+                break;
+            }
+            current = current->next;
+        }
+    }
+
+    void insertAfterTail(int value) {
+        Point* newNode = new Point(value);
+        if (tail == nullptr) {
+            head = newNode;
+            tail = newNode;
+        }
+        else {
+            newNode->prev = tail;
+            tail->next = newNode;
+            tail = newNode;
+        }
+        cout << "-------------------------\n";
+        cout << " " << value << " has been inserted" << endl;
+        cout << "-------------------------";
+    }
+
+    void deleteElement(int key) {
+        Point* current = head;
+        while (current != nullptr) {
+            if (current->data == key) {
+                if (current == head) {
+                    head = current->next;
+                    if (head != nullptr)
+                        head->prev = nullptr;
+                    else
+                        tail = nullptr;
+                }
+                else if (current == tail) {
+                    tail = current->prev;
+                    tail->next = nullptr;
+                }
+                else {
+                    current->prev->next = current->next;
+                    current->next->prev = current->prev;
+                }
+                delete current;
+                cout << "-------------------------\n";
+                cout << key << " has been deleted" << endl;
+                cout << "-------------------------";
+                break;
+            }
+            current = current->next;
+        }
+    }
+
+    void printHeadToTail() {
+        Point* current = head;
+        while (current != nullptr) {
+            cout << current->data << " ";
+            current = current->next;
+        }
+        cout << endl;
+    }
+
+    void printTailToHead() {
+        Point* current = tail;
+        while (current != nullptr) {
+            cout << current->data << " ";
+            current = current->prev;
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+
+    DLinkedList dLL;
+    int choice;
+
+    do {
+        cout << "\n\n****************************************"
+            "\n Doubly Linked List - selection:"
+            "\n1) SEARCH a data"
+            "\n2) INSERT a data into HEAD"
+            "\n3) INSERT a data after an ELEMENT"
+            "\n4) INSERT a data after TAIL"
+            "\n5) DELETE one element"
+            "\n6) PRINT the list from HEAD TO TAIL"
+            "\n7) PRINT the list from TAIL TO HEAD"
+            "\n\n0) CLOSE the program"
+            "\n****************************************"
+            "\n\nYour selection: ";
+
+        cin >> choice;
+        switch (choice) {
+        case 1: {
+            int key;
+            cout << "Enter the element you want to search: ";
+            cin >> key;
+            if (dLL.search(key)) {
+                cout << "----------------------------\n";
+                cout << "The element has been found" << endl;
+                cout << "----------------------------";
+            }
+            else {
+                cout << "----------------------------------\n";
+                cout << "The element has NOT been found!!!" << endl;
+                cout << "----------------------------------";
+            }
+            break;
+        }
+        case 2: {
+            int value;
+            cout << "Enter the value you want to add into the head: ";
+            cin >> value;
+            dLL.insertIntoHead(value);
+            break;
+        }
+        case 3: {
+            int value, element;
+            cout << "Enter the value you want to add: ";
+            cin >> value;
+            cout << "After which element?: ";
+            cin >> element;
+            if (dLL.search(element))
+                dLL.insertAfterElement(value, element);
+            else {
+                cout << "--------------------------------------------------------------------\n";
+                cout << "The element you want to insert the value after has NOT been found!!!" << endl;
+                cout << "--------------------------------------------------------------------";
+            }
+            break;
+        }
+        case 4: {
+            int value;
+            cout << "Enter the value you want to add after the tail: ";
+            cin >> value;
+            dLL.insertAfterTail(value);
+            break;
+        }
+        case 5: {
+            int key;
+            cout << "Enter the element you want to delete: ";
+            cin >> key;
+            if (dLL.search(key))
+                dLL.deleteElement(key);
+            else {
+                cout << "----------------------------------------------------\n";
+                cout << "The element you want to delete has NOT been found!!!" << endl;
+                cout << "----------------------------------------------------";
+            }
+            break;
+        }
+        case 6: {
+            cout << "\n_HEAD TO TAIL LIST_\n";
+            cout << "-------------------\n";
+            dLL.printHeadToTail();
+            cout << "-------------------";
+            break;
+        }
+        case 7: {
+            cout << "\n_TAIL TO HEAD LIST_\n";
+            cout << "-------------------\n";
+            dLL.printTailToHead();
+            cout << "-------------------";
+            break;
+        }
+        case 0: {
+            cout << "\n    Program has been CLOSED!\n\n" << endl;
+            break;
+        }
+        default:
+            cout << "\n    Enter a VALID choice!" << endl;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
